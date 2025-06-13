@@ -34,10 +34,10 @@ public class GamePanel extends JPanel implements ActionListener {
     private int mouseTargetY;
 
     // For caught ball animation
-    private SkillBall animatingPulledBall = null; // The ball currently being pulled by lasso
+    private Balls animatingPulledBall = null; // The ball currently being pulled by lasso
 
     // For ball currently held by player
-    private SkillBall heldBall = null;
+    private Balls heldBall = null;
     private double heldBallOffsetAngle = 0;
 
     // Constants for message types
@@ -284,8 +284,8 @@ public class GamePanel extends JPanel implements ActionListener {
                 );
                 
                 g2d.drawImage(currentEffectSprite, 
-                              player.getX() + (50 - BONUS_EFFECT_DISPLAY_SIZE) / 2-30, 
-                              player.getY() + (50 - BONUS_EFFECT_DISPLAY_SIZE) / 2-20, 
+                              player.getX() + (50 - BONUS_EFFECT_DISPLAY_SIZE) / 2-15, 
+                              player.getY() + (50 - BONUS_EFFECT_DISPLAY_SIZE) / 2-40, 
                               BONUS_EFFECT_DISPLAY_SIZE, BONUS_EFFECT_DISPLAY_SIZE, null);
             } else {
                 g2d.setColor(new Color(0, 255, 0, 100));
@@ -300,12 +300,12 @@ public class GamePanel extends JPanel implements ActionListener {
             String timerText = String.format("%d s", remainingTime / 60); 
             
             int textWidth = fm.stringWidth(timerText);
-            g2d.drawString(timerText, player.getX() + (50 - textWidth) / 2, player.getY() - 10);
+            g2d.drawString(timerText, player.getX() + (40 - textWidth) / 2, player.getY() - 10);
         }
 
 
         // Draw Skill Balls
-        for (SkillBall ball : gameViewModel.getSkillBalls()) {
+        for (Balls ball : gameViewModel.getBalls()) {
             if (ball.isActive() && !ball.isHeldByPlayer() && !ball.isBeingPulled()) {
                 if (ball.isBomb()) {
                     if (AssetLoader.bombAlienImage != null) {
@@ -407,13 +407,23 @@ public class GamePanel extends JPanel implements ActionListener {
 
         // Draw Basket/Collection point
         if (AssetLoader.basketImage != null) {
-            int basketX = getWidth() - BASKET_DISPLAY_WIDTH - 100; // 20px dari kanan
-            int basketY = getHeight() - BASKET_DISPLAY_HEIGHT - 100; // 20px dari bawah
-            g2d.drawImage(AssetLoader.basketImage, basketX, basketY, BASKET_DISPLAY_WIDTH+50, BASKET_DISPLAY_HEIGHT+ 50, null);
+            // Hitung posisi X agar di tengah horizontal
+            // (Lebar frame / 2) - (Lebar basket / 2)
+            int basketX = (getWidth() / 2) - ((BASKET_DISPLAY_WIDTH + 50) / 2);
+
+            // Hitung posisi Y agar dekat bagian bawah (misalnya, 20 piksel dari bawah)
+            int basketY = getHeight() - (BASKET_DISPLAY_HEIGHT + 50) - 50; // 20px dari bawah
+
+            g2d.drawImage(AssetLoader.basketImage, basketX, basketY, BASKET_DISPLAY_WIDTH + 50, BASKET_DISPLAY_HEIGHT + 50, null);
         } else {
             // Fallback: Kotak coklat
             g2d.setColor(new Color(139, 69, 19)); // Brown
-            g2d.fillRect(getWidth() - BASKET_DISPLAY_WIDTH, getHeight() - BASKET_DISPLAY_HEIGHT, BASKET_DISPLAY_WIDTH, BASKET_DISPLAY_HEIGHT);
+
+            // Hitung posisi X dan Y untuk fallback juga
+            int basketX = (getWidth() / 2) - (BASKET_DISPLAY_WIDTH / 2);
+            int basketY = getHeight() - BASKET_DISPLAY_HEIGHT - 20; // 20px dari bawah
+
+            g2d.fillRect(basketX, basketY, BASKET_DISPLAY_WIDTH, BASKET_DISPLAY_HEIGHT);
         }
 
 
@@ -504,7 +514,11 @@ public class GamePanel extends JPanel implements ActionListener {
         g2d.setColor(Color.WHITE);
         g2d.setFont(new Font("Arial", Font.BOLD, 20));
         g2d.drawString("Score: " + player.getScore(), 10, 30);
-        g2d.drawString("Balls: " + player.getCollectedBalls(), 10, 60);
+        g2d.drawString("Count Star: " + player.getCollectedBalls(), 10, 60);
+    }
+
+    public MainFrame getMainFrame() {
+        return this.mainFrame;
     }
 
     @Override
@@ -546,16 +560,25 @@ public class GamePanel extends JPanel implements ActionListener {
         repaint();
 
         if (heldBall != null) {
-            Player player = gameViewModel.getPlayer();
-            Rectangle playerBounds = new Rectangle(player.getX(), player.getY(), 50, 50);
-            Rectangle basketBounds = new Rectangle(getWidth() - 100, getHeight() - 100, 80, 80);
+        Player player = gameViewModel.getPlayer();
+        Rectangle playerBounds = new Rectangle(player.getX(), player.getY(), 50, 50);
 
-            if (playerBounds.intersects(basketBounds)) {
-                gameViewModel.collectHeldBall(heldBall);
-                heldBall = null;
-                heldBallOffsetAngle = 0;
-            }
+        // --- Perbarui posisi deteksi keranjang ---
+        // Hitung batas keranjang dengan posisi yang sudah diperbarui
+        int basketWidthActual = BASKET_DISPLAY_WIDTH + 50;
+        int basketHeightActual = BASKET_DISPLAY_HEIGHT + 50;
+        int basketX = (getWidth() / 2) - (basketWidthActual / 2);
+        int basketY = getHeight() - basketHeightActual - 50; // Sesuaikan dengan nilai di paintComponent
+
+        Rectangle basketBounds = new Rectangle(basketX, basketY, basketWidthActual, basketHeightActual);
+        // --- Akhir Perbarui posisi deteksi keranjang ---
+
+        if (playerBounds.intersects(basketBounds)) {
+            gameViewModel.collectHeldBall(heldBall);
+            heldBall = null;
+            heldBallOffsetAngle = 0;
         }
+    }
     }
 
     private void handleLassoAnimation() {
@@ -615,7 +638,7 @@ public class GamePanel extends JPanel implements ActionListener {
         }
     }
 
-    public void startPullAnimation(SkillBall ball, int caughtX, int caughtY) {
+    public void startPullAnimation(Balls ball, int caughtX, int caughtY) {
         this.animatingPulledBall = ball;
         Player player = gameViewModel.getPlayer();
         int playerCenterX = player.getX() + 25;

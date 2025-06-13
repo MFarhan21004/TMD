@@ -22,7 +22,7 @@ public class MainViewModel {
             return;
         }
         this.currentUsername = username.trim();
-        mainFrame.showMessage("Game Start", "Starting game for " + currentUsername + "...", JOptionPane.INFORMATION_MESSAGE);
+        
         mainFrame.switchToGamePanel();
     }
 

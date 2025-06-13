@@ -2,22 +2,25 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+
+import javax.swing.JOptionPane;
+
 import java.awt.Rectangle;
 
 public class GameViewModel {
     private Player player;
-    private List<SkillBall> skillBalls;
+    private List<Balls> Balls;
     private String currentUsername;
     private DatabaseModel databaseModel;
     private GamePanel gamePanel;
 
     private final int MAX_BALLS = 10;
-    private final int BALL_SPAWN_INTERVAL = 100;
+    private final int BALL_SPAWN_INTERVAL = 80;
     private int spawnCounter = 0;
     private Random random;
 
-    private final double BOMB_CHANCE = 0.2;
-    private final double BONUS_STAR_CHANCE = 0.15;
+    private final double BOMB_CHANCE = 0.3;
+    private final double BONUS_Balls_CHANCE = 0.2;
 
     private final int BONUS_DURATION_TICKS = 600; 
     private final int MAX_BONUS_DURATION_TICKS = 1800; 
@@ -27,13 +30,13 @@ public class GameViewModel {
         this.gamePanel = gamePanel;
         this.databaseModel = new DatabaseModel();
         this.random = new Random();
-        this.skillBalls = new ArrayList<>();
+        this.Balls = new ArrayList<>();
     }
 
     public void initializeGame() {
-        // Player starts in the middle, using visual dimensions
+        // Player Ballsts in the middle, using visual dimensions
         player = new Player(gamePanel.getWidth() / 2 - Player.VISUAL_WIDTH / 2, gamePanel.getHeight() / 2 - Player.VISUAL_HEIGHT / 2);
-        skillBalls.clear();
+        Balls.clear();
         spawnCounter = 0;
     }
 
@@ -41,8 +44,8 @@ public class GameViewModel {
         return player;
     }
 
-    public List<SkillBall> getSkillBalls() {
-        return skillBalls;
+    public List<Balls> getBalls() {
+        return Balls;
     }
 
     public void movePlayer(int dx, int dy) {
@@ -65,9 +68,9 @@ public class GameViewModel {
         int hitboxY = player.getY() + (Player.VISUAL_HEIGHT - Player.HITBOX_HEIGHT) / 2;
         Rectangle playerHitbox = new Rectangle(hitboxX, hitboxY, Player.HITBOX_WIDTH, Player.HITBOX_HEIGHT); // <<< INI PERBAIKANNYA
 
-        Iterator<SkillBall> iterator = skillBalls.iterator();
+        Iterator<Balls> iterator = Balls.iterator();
         while (iterator.hasNext()) {
-            SkillBall ball = iterator.next();
+            Balls ball = iterator.next();
             if (ball.isActive() && !ball.isBeingPulled() && !ball.isHeldByPlayer()) {
                 ball.move();
 
@@ -83,7 +86,8 @@ public class GameViewModel {
                             System.out.println("GAME OVER! Player hit a bomb!");
                             gamePanel.playBombEffectSound();
                             gamePanel.stopGame();
-                            gamePanel.showMessage("GAME OVER", "You hit a bomb! Score: " + player.getScore(), GamePanel.MESSAGE_TYPE_ERROR);
+                            gamePanel.showMessage("GAME OVER!!!", "\nYour Final Score: " + player.getScore() + " points.\n                   Count: " + player.getCollectedBalls() +  " Star.", GamePanel.MESSAGE_TYPE_ERROR);
+                            gamePanel.getMainFrame().switchToMainPanel();
                             return;
                         }
                     }
@@ -118,41 +122,41 @@ public class GameViewModel {
 
 
         spawnCounter++;
-        if (spawnCounter >= BALL_SPAWN_INTERVAL && skillBalls.size() < MAX_BALLS) {
+        if (spawnCounter >= BALL_SPAWN_INTERVAL && Balls.size() < MAX_BALLS) {
             spawnSkillBall();
             spawnCounter = 0;
         }
     }
 
     private void spawnSkillBall() {
-        int startX;
-        int startY;
+        int BallstX;
+        int BallstY;
         boolean movingRight = random.nextBoolean();
 
         boolean isBomb = false;
-        boolean isBonusStar = false;
+        boolean isBonusBalls = false;
 
         double randType = random.nextDouble();
         if (randType < BOMB_CHANCE) {
             isBomb = true;
-        } else if (randType < BOMB_CHANCE + BONUS_STAR_CHANCE) {
-            isBonusStar = true;
+        } else if (randType < BOMB_CHANCE + BONUS_Balls_CHANCE) {
+            isBonusBalls = true;
         }
 
         if (movingRight) {
-            startX = -50;
-            startY = random.nextInt(gamePanel.getHeight() / 2 - 50);
+            BallstX = -50;
+            BallstY = random.nextInt(gamePanel.getHeight() / 2 - 50);
         } else {
-            startX = gamePanel.getWidth() + 50;
-            startY = random.nextInt(gamePanel.getHeight() / 2 - 50) + gamePanel.getHeight() / 2;
+            BallstX = gamePanel.getWidth() + 50;
+            BallstY = random.nextInt(gamePanel.getHeight() / 2 - 50) + gamePanel.getHeight() / 2;
         }
 
-        skillBalls.add(new SkillBall(startX, startY, 2, 5, 30, 50, isBomb, isBonusStar));
+        Balls.add(new Balls(BallstX, BallstY, 2, 5, 40, 60, isBomb, isBonusBalls));
     }
 
     public boolean checkLassoTipCollision(Rectangle lassoTipBounds, int lassoTipX, int lassoTipY) {
-        SkillBall caughtBall = null;
-        for (SkillBall ball : skillBalls) {
+        Balls caughtBall = null;
+        for (Balls ball : Balls) {
             if (ball.isActive() && !ball.isBeingPulled() && !ball.isHeldByPlayer()) {
                 Rectangle ballBounds = new Rectangle(ball.getX(), ball.getY(), ball.getSize(), ball.getSize());
                 if (lassoTipBounds.intersects(ballBounds)) {
@@ -169,10 +173,10 @@ public class GameViewModel {
                 System.out.println("Bomb caught by lasso tip! Pulling to player for explosion.");
                 gamePanel.startPullAnimation(caughtBall, lassoTipX, lassoTipY);
                 return true;
-            } else { // It's a regular skill ball or bonus star
+            } else { // It's a regular skill ball or bonus Balls
                 caughtBall.setActive(false);
                 caughtBall.setBeingPulled(true);
-                System.out.println("Ball caught by lasso tip! Starting pull animation to player.");
+                System.out.println("Ball caught by lasso tip! Ballsting pull animation to player.");
                 gamePanel.startPullAnimation(caughtBall, lassoTipX, lassoTipY);
                 return true;
             }
@@ -180,21 +184,31 @@ public class GameViewModel {
         return false;
     }
 
-    public boolean attachBallToPlayer(SkillBall ball) {
+    public boolean attachBallToPlayer(Balls ball) {
         if (ball.isBomb()) {
             if (player.isInvincible()) {
                 System.out.println("Bomb lassoed, but player is invincible! Bomb removed.");
-                skillBalls.remove(ball);
+                Balls.remove(ball);
             } else {
                 System.out.println("GAME OVER! Bomb exploded at player!");
-                gamePanel.playBombEffectSound();
-                gamePanel.stopGame();
-                gamePanel.showMessage("GAME OVER", "A bomb exploded on you! Score: " + player.getScore(), GamePanel.MESSAGE_TYPE_ERROR);
-                skillBalls.remove(ball);
+                gamePanel.playBombEffectSound(); // Putar suara efek bom
+                gamePanel.stopGame(); // Hentikan logika game
+
+                // --- Peningkatan Tampilan GAME OVER (TANPA IKON KUSTOM) ---
+                JOptionPane.showMessageDialog(
+                    gamePanel, // Parent component
+                    "A bomb exploded on you!\nYour Final Score: " + player.getScore() + " points.\n                   Count: " + player.getCollectedBalls() +  " Star.", // Pesan
+                    "GAME OVER!", // Judul dialog
+                    JOptionPane.ERROR_MESSAGE // Menggunakan tipe ERROR_MESSAGE untuk ikon silang merah standar
+                );
+                // --- Akhir Peningkatan Tampilan GAME OVER ---
+                gamePanel.getMainFrame().switchToMainPanel();
+                Balls.remove(ball); // Hapus bola bom
+        
             }
             return false;
         } else if (ball.isBonusStar()) {
-            System.out.println("BONUS STAR COLLECTED! Speed boost & Invincibility!");
+            System.out.println("BONUS Balls COLLECTED! Speed boost & Invincibility!");
             gamePanel.playBonusMusic();
 
             player.addScore(ball.getValue() * 2);
@@ -208,7 +222,7 @@ public class GameViewModel {
             player.setSpeedBoostDuration(Math.min(currentSpeedBoostDuration + BONUS_DURATION_TICKS, MAX_BONUS_DURATION_TICKS));
             player.setInvincibilityDuration(Math.min(currentInvincibilityDuration + BONUS_DURATION_TICKS, MAX_BONUS_DURATION_TICKS));
 
-            skillBalls.remove(ball);
+            Balls.remove(ball);
             return false;
         }
 
@@ -218,25 +232,25 @@ public class GameViewModel {
         return true;
     }
 
-    public void collectHeldBall(SkillBall ball) {
+    public void collectHeldBall(Balls ball) {
         if (ball.isBomb()) {
             System.out.println("GAME OVER! Brought bomb to basket!");
             gamePanel.playBombEffectSound();
             gamePanel.stopGame();
             gamePanel.showMessage("GAME OVER", "You brought a bomb to the basket! Score: " + player.getScore(), GamePanel.MESSAGE_TYPE_ERROR);
-            skillBalls.remove(ball);
+            Balls.remove(ball);
             return;
         }
         if (ball.isBonusStar()) {
-             System.out.println("Bonus Star (shouldn't be here) deposited. Removing.");
-             skillBalls.remove(ball);
+             System.out.println("Bonus Balls (shouldn't be here) deposited. Removing.");
+             Balls.remove(ball);
              return;
         }
 
         player.addScore(ball.getValue());
         player.addCollectedBall();
         ball.setHeldByPlayer(false);
-        skillBalls.remove(ball);
+        Balls.remove(ball);
         System.out.println("Ball deposited! Score: " + player.getScore() + ", Balls: " + player.getCollectedBalls());
     }
 

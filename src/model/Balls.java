@@ -1,7 +1,7 @@
 import java.awt.Color;
 import java.util.Random;
 
-public class SkillBall {
+public class Balls {
     private int x;
     private int y;
     private int originalX; // Store original position for animation start
@@ -18,7 +18,7 @@ public class SkillBall {
     private boolean movingRight; // Direction of movement
 
     // Modified constructor to accept isBomb and isBonusStar parameters
-    public SkillBall(int startX, int startY, int minSpeed, int maxSpeed, int minSize, int maxSize, boolean isBomb, boolean isBonusStar) {
+    public Balls(int startX, int startY, int minSpeed, int maxSpeed, int minSize, int maxSize, boolean isBomb, boolean isBonusStar) {
         this.x = startX;
         this.y = startY;
         this.originalX = startX;
