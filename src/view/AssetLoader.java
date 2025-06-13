@@ -5,22 +5,36 @@ import java.net.URL;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
 import java.awt.Transparency;
-import javax.sound.sampled.*; // NEW: Import for sound assets
+
+// NEW: Penting untuk kontrol volume
+import javax.sound.sampled.*; // Pastikan ini diimpor
 
 public class AssetLoader {
     public static BufferedImage playerAstronautSprite;
     public static BufferedImage backgroundImage;
+     public static BufferedImage mainMenuBackgroundImage;
     public static BufferedImage skillBallImage;
     public static BufferedImage bombAlienImage;
     public static BufferedImage bonusStarImage;
     public static BufferedImage lassoChainSegmentImage;
     public static BufferedImage lassoHookImage;
-    public static BufferedImage bonusEffectSprite; // NEW: for efekbonus.png
+    public static BufferedImage bonusEffectSprite; 
 
     // Sound assets
-    public static Clip backgroundMusicClip; // For background_music.wav
-    public static Clip bonusMusicClip;      // NEW: For musicbonus.wav
-    public static Clip bombEffectClip;      // NEW: For musicefekbom.wav
+    public static Clip backgroundMusicClip;
+    public static Clip bonusMusicClip;      
+    public static Clip bombEffectClip;      
+    public static Clip mainMenuMusicClip;   
+
+    // NEW: FloatControl untuk mengatur volume masing-masing klip
+    public static FloatControl backgroundMusicGainControl;
+    public static FloatControl bonusMusicGainControl;
+    public static FloatControl bombEffectGainControl;
+    public static FloatControl mainMenuMusicGainControl;
+
+    // NEW: Gambar untuk keranjang
+    public static BufferedImage basketImage; 
+
 
     public static void loadAssets() {
         System.out.println("Loading assets...");
@@ -29,7 +43,7 @@ public class AssetLoader {
 
         try {
             // Load Player Astronaut
-            URL playerAstronautUrl = AssetLoader.class.getResource("/assets/astronot.png");
+            URL playerAstronautUrl = AssetLoader.class.getResource("/assets/astronot.png"); // Ganti nama file ini jika di aset Anda namanya "astronot.png"
             if (playerAstronautUrl != null) {
                 BufferedImage tempPlayer = ImageIO.read(playerAstronautUrl);
                 if (tempPlayer != null) {
@@ -58,6 +72,21 @@ public class AssetLoader {
                 }
             } else {
                 System.err.println("Background image not found: /assets/background.jpg");
+            }
+
+            URL mainMenuBackgroundUrl = AssetLoader.class.getResource("/assets/main_background.jpg"); // Nama file baru
+            if (mainMenuBackgroundUrl != null) {
+                BufferedImage tempMainMenuBg = ImageIO.read(mainMenuBackgroundUrl);
+                if (tempMainMenuBg != null) {
+                    mainMenuBackgroundImage = gc.createCompatibleImage(tempMainMenuBg.getWidth(), tempMainMenuBg.getHeight(), Transparency.OPAQUE);
+                    mainMenuBackgroundImage.getGraphics().drawImage(tempMainMenuBg, 0, 0, null);
+                    mainMenuBackgroundImage.getGraphics().dispose();
+                    System.out.println("Main menu background image loaded.");
+                } else {
+                    System.err.println("Main menu background image (tempMainMenuBg) is null. File might be corrupted or empty.");
+                }
+            } else {
+                System.err.println("Main menu background image not found: /assets/main_background.jpg");
             }
 
             // Load Skill Ball (Star) Image (bintang1.png)
@@ -140,7 +169,7 @@ public class AssetLoader {
                 System.err.println("Lasso hook image not found: /assets/kail.png");
             }
 
-            // NEW: Load Bonus Effect Sprite (efekbonus.png)
+            // Load Bonus Effect Sprite (efekbonus.png)
             URL bonusEffectUrl = AssetLoader.class.getResource("/assets/efekbonus.png");
             if (bonusEffectUrl != null) {
                 BufferedImage tempEffect = ImageIO.read(bonusEffectUrl);
@@ -156,14 +185,35 @@ public class AssetLoader {
                 System.err.println("Bonus effect sprite not found: /assets/efekbonus.png");
             }
 
+            // Load Basket Image (kapal.png)
+            URL basketImageUrl = AssetLoader.class.getResource("/assets/kapal.png");
+            if (basketImageUrl != null) {
+                BufferedImage tempBasket = ImageIO.read(basketImageUrl);
+                if (tempBasket != null) {
+                    basketImage = gc.createCompatibleImage(tempBasket.getWidth(), tempBasket.getHeight(), Transparency.TRANSLUCENT);
+                    basketImage.getGraphics().drawImage(tempBasket, 0, 0, null);
+                    basketImage.getGraphics().dispose();
+                    System.out.println("Basket image loaded.");
+                } else {
+                    System.err.println("Basket image (tempBasket) is null. File might be corrupted or empty.");
+                }
+            } else {
+                System.err.println("Basket image not found: /assets/kapal.png");
+            }
 
-            // NEW: Load Sound Assets
+
+            // Load Sound Assets dan mendapatkan FloatControl
             // Background Music (background_music.wav)
             URL bgMusicUrl = AssetLoader.class.getResource("/assets/background_music.wav");
             if (bgMusicUrl != null) {
                 try (AudioInputStream audioStream = AudioSystem.getAudioInputStream(bgMusicUrl)) {
                     backgroundMusicClip = AudioSystem.getClip();
                     backgroundMusicClip.open(audioStream);
+                    if (backgroundMusicClip.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
+                        backgroundMusicGainControl = (FloatControl) backgroundMusicClip.getControl(FloatControl.Type.MASTER_GAIN);
+                    } else { // NEW: Handle case where control is not supported
+                        System.err.println("Master Gain control not supported for background music.");
+                    }
                     System.out.println("Background music loaded.");
                 } catch (UnsupportedAudioFileException | LineUnavailableException e) {
                     System.err.println("Error loading background music: " + e.getMessage());
@@ -178,6 +228,11 @@ public class AssetLoader {
                 try (AudioInputStream audioStream = AudioSystem.getAudioInputStream(bonusMusicUrl)) {
                     bonusMusicClip = AudioSystem.getClip();
                     bonusMusicClip.open(audioStream);
+                    if (bonusMusicClip.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
+                        bonusMusicGainControl = (FloatControl) bonusMusicClip.getControl(FloatControl.Type.MASTER_GAIN);
+                    } else { // NEW
+                        System.err.println("Master Gain control not supported for bonus music.");
+                    }
                     System.out.println("Bonus music loaded.");
                 } catch (UnsupportedAudioFileException | LineUnavailableException e) {
                     System.err.println("Error loading bonus music: " + e.getMessage());
@@ -192,6 +247,11 @@ public class AssetLoader {
                 try (AudioInputStream audioStream = AudioSystem.getAudioInputStream(bombEffectUrl)) {
                     bombEffectClip = AudioSystem.getClip();
                     bombEffectClip.open(audioStream);
+                    if (bombEffectClip.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
+                        bombEffectGainControl = (FloatControl) bombEffectClip.getControl(FloatControl.Type.MASTER_GAIN);
+                    } else { // NEW
+                        System.err.println("Master Gain control not supported for bomb effect sound.");
+                    }
                     System.out.println("Bomb effect sound loaded.");
                 } catch (UnsupportedAudioFileException | LineUnavailableException e) {
                     System.err.println("Error loading bomb effect sound: " + e.getMessage());
@@ -200,10 +260,45 @@ public class AssetLoader {
                 System.err.println("Bomb effect sound not found: /assets/musicefekbom.wav");
             }
 
+            // Main Menu Music (main_music.wav)
+            URL mainMenuMusicUrl = AssetLoader.class.getResource("/assets/main_music.wav");
+            if (mainMenuMusicUrl != null) {
+                try (AudioInputStream audioStream = AudioSystem.getAudioInputStream(mainMenuMusicUrl)) {
+                    mainMenuMusicClip = AudioSystem.getClip();
+                    mainMenuMusicClip.open(audioStream);
+                    if (mainMenuMusicClip.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
+                        mainMenuMusicGainControl = (FloatControl) mainMenuMusicClip.getControl(FloatControl.Type.MASTER_GAIN);
+                    } else { // NEW
+                        System.err.println("Master Gain control not supported for main menu music.");
+                    }
+                    System.out.println("Main menu music loaded.");
+                } catch (UnsupportedAudioFileException | LineUnavailableException e) {
+                    System.err.println("Error loading main menu music: " + e.getMessage());
+                }
+            } else {
+                System.err.println("Main menu music not found: /assets/main_music.wav");
+            }
+
 
         } catch (IOException e) {
             System.err.println("Error loading assets: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    // Metode utilitas untuk mengatur volume klip
+    public static void setClipVolume(FloatControl gainControl, float volume) {
+        if (gainControl != null) {
+            float minDb = gainControl.getMinimum();
+            float maxDb = gainControl.getMaximum();
+            
+            if (volume <= 0.0f) { 
+                gainControl.setValue(minDb);
+            } else {
+                float dB = (float) (Math.log10(volume) * 20.0);
+                dB = Math.max(minDb, Math.min(dB, maxDb));
+                gainControl.setValue(dB);
+            }
         }
     }
 }

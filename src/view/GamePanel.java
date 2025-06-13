@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.awt.image.BufferedImage;
 import javax.sound.sampled.Clip;
+import javax.sound.sampled.FloatControl; // NEW: Penting untuk kontrol volume
 
 
 public class GamePanel extends JPanel implements ActionListener {
@@ -46,9 +47,12 @@ public class GamePanel extends JPanel implements ActionListener {
     public static final int MESSAGE_TYPE_ERROR = JOptionPane.ERROR_MESSAGE;
     public static final int MESSAGE_TYPE_QUESTION = JOptionPane.QUESTION_MESSAGE;
 
-    // Ukuran tampilan kail dan segmen rantai
-    private final int HOOK_DISPLAY_SIZE = 50; 
-    private final int CHAIN_SEGMENT_DISPLAY_SIZE = 30; 
+    private final int HOOK_DISPLAY_SIZE = 50;
+    private final int CHAIN_SEGMENT_DISPLAY_SIZE = 25; // Ukuran segmen rantai yang diinginkan
+
+    // Ukuran tampilan keranjang
+    private final int BASKET_DISPLAY_WIDTH = 80; 
+    private final int BASKET_DISPLAY_HEIGHT = 120; 
 
     // --- PLAYER ANIMATION VARIABLES ---
     private HashMap<String, ArrayList<Rectangle>> playerAnimations;
@@ -66,15 +70,14 @@ public class GamePanel extends JPanel implements ActionListener {
     private final int BONUS_EFFECT_FRAME_HEIGHT = 228; // Adjust based on efekbonus.png frame size
     private final int BONUS_EFFECT_ANIMATION_SPEED = 5; // Speed for bonus effect animation
 
-    // Ukuran tampilan efek bonus
-    private final int BONUS_EFFECT_DISPLAY_SIZE = 180; // Ini yang terakhir Anda set
+    private final int BONUS_EFFECT_DISPLAY_SIZE = 180; // Ukuran tampilan efek bonus
     private final Font BONUS_TIMER_FONT = new Font("Arial", Font.BOLD, 24);
 
 
     public GamePanel(String username, MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         gameViewModel = new GameViewModel(username, this);
-        setPreferredSize(new Dimension(800, 600));
+        setPreferredSize(new Dimension(1200, 700));
         setFocusable(true);
         addKeyListener(new GameKeyListener());
         addMouseListener(new GameMouseListener());
@@ -83,13 +86,31 @@ public class GamePanel extends JPanel implements ActionListener {
         gameLoop = new Timer(15, this);
 
         loadPlayerAnimations(); // Call this to set up animations
-        playBackgroundMusic(); // Start background music
+        // playBackgroundMusic(); // Tidak perlu panggil di sini, akan dipanggil di startGameLogic
     }
 
     public void startGameLogic() {
         gameViewModel.initializeGame();
         resetGamePanelState();
-        playBackgroundMusic(); // Restart background music if it stopped
+        playBackgroundMusic(); // Restart background music
+        // NEW: Atur volume musik latar game saat dimulai (misal 0.5f untuk 50%)
+        // Pastikan gain control tidak null sebelum digunakan
+        if (AssetLoader.backgroundMusicGainControl != null) {
+            AssetLoader.setClipVolume(AssetLoader.backgroundMusicGainControl, 0.5f);
+        } else {
+            System.err.println("Background music gain control not available.");
+        }
+        if (AssetLoader.bonusMusicGainControl != null) {
+            AssetLoader.setClipVolume(AssetLoader.bonusMusicGainControl, 0.6f); // Bonus music sedikit lebih keras
+        } else {
+            System.err.println("Bonus music gain control not available.");
+        }
+        if (AssetLoader.bombEffectGainControl != null) {
+            AssetLoader.setClipVolume(AssetLoader.bombEffectGainControl, 0.8f); // Efek bom paling keras
+        } else {
+            System.err.println("Bomb effect sound gain control not available.");
+        }
+
         gameLoop.start();
     }
 
@@ -118,14 +139,9 @@ public class GamePanel extends JPanel implements ActionListener {
     private void loadPlayerAnimations() {
         playerAnimations = new HashMap<>();
 
-        // Anda HARUS mengukur ini dengan akurat di editor gambar (playerastronot.png)
-        // Berdasarkan diskusi terakhir, Anda yakin ini 80x118 atau 80x120.
-        // Jika masih error, periksa kembali DIMENSI TOTAL file playerastronot.png Anda
-        // Harus minimal 320x480 (4 kolom * 80px, 4 baris * 120px)
         int frameWidth = 80;  
         int frameHeight = 118; 
 
-        // Baris 0: Idle Down (4 frames)
         ArrayList<Rectangle> idleDownFrames = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
             idleDownFrames.add(new Rectangle(i * frameWidth, 0 * frameHeight, frameWidth, frameHeight));
@@ -133,28 +149,24 @@ public class GamePanel extends JPanel implements ActionListener {
         playerAnimations.put("idle_down", idleDownFrames);
         playerAnimations.put("walk_down", idleDownFrames);
 
-        // Baris 1: Walk Left (4 frames)
         ArrayList<Rectangle> walkLeftFrames = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
             walkLeftFrames.add(new Rectangle(i * frameWidth, 1 * frameHeight, frameWidth, frameHeight));
         }
         playerAnimations.put("walk_left", walkLeftFrames);
 
-        // Baris 2: Walk Right (4 frames)
         ArrayList<Rectangle> walkRightFrames = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
             walkRightFrames.add(new Rectangle(i * frameWidth, 2 * frameHeight, frameWidth, frameHeight));
         }
         playerAnimations.put("walk_right", walkRightFrames);
 
-        // Baris 3: Walk Up (4 frames)
         ArrayList<Rectangle> walkUpFrames = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
             walkUpFrames.add(new Rectangle(i * frameWidth, 3 * frameHeight, frameWidth, frameHeight));
         }
         playerAnimations.put("walk_up", walkUpFrames);
 
-        // Untuk idle state lainnya, gunakan frame pertama dari arah terakhir
         playerAnimations.put("idle_left", new ArrayList<Rectangle>() {{ add(new Rectangle(0 * frameWidth, 1 * frameHeight, frameWidth, frameHeight)); }} );
         playerAnimations.put("idle_right", new ArrayList<Rectangle>() {{ add(new Rectangle(0 * frameWidth, 2 * frameHeight, frameWidth, frameHeight)); }} );
         playerAnimations.put("idle_up", new ArrayList<Rectangle>() {{ add(new Rectangle(0 * frameWidth, 3 * frameHeight, frameWidth, frameHeight)); }} );
@@ -173,23 +185,20 @@ public class GamePanel extends JPanel implements ActionListener {
         }
     }
 
-    public void playBonusMusic() { // Public agar GameViewModel bisa memanggilnya
+    public void playBonusMusic() {
         if (AssetLoader.bonusMusicClip != null) {
-            stopBackgroundMusic(); // Stop main music
-
-            // NEW: Hanya mulai dari awal jika musik belum berjalan
+            stopBackgroundMusic();
             if (!AssetLoader.bonusMusicClip.isRunning()) { 
-                AssetLoader.bonusMusicClip.setFramePosition(0); // Reset ke awal hanya jika mulai baru
+                AssetLoader.bonusMusicClip.setFramePosition(0);
                 AssetLoader.bonusMusicClip.loop(Clip.LOOP_CONTINUOUSLY);
             }
-            // Jika sudah berjalan, biarkan saja ia melanjutkan dari posisi terakhirnya
         }
     }
 
-    public void stopBonusMusic() { // Public agar GameViewModel bisa memanggilnya
+    public void stopBonusMusic() {
         if (AssetLoader.bonusMusicClip != null && AssetLoader.bonusMusicClip.isRunning()) {
             AssetLoader.bonusMusicClip.stop();
-            playBackgroundMusic(); // Resume main music
+            playBackgroundMusic();
         }
     }
 
@@ -213,6 +222,9 @@ public class GamePanel extends JPanel implements ActionListener {
         stopBackgroundMusic();
         if (AssetLoader.bonusMusicClip != null && AssetLoader.bonusMusicClip.isRunning()) {
              AssetLoader.bonusMusicClip.stop();
+        }
+        if (AssetLoader.mainMenuMusicClip != null && AssetLoader.mainMenuMusicClip.isRunning()) {
+             AssetLoader.mainMenuMusicClip.stop();
         }
     }
 
@@ -248,7 +260,7 @@ public class GamePanel extends JPanel implements ActionListener {
                 BufferedImage currentSprite = AssetLoader.playerAstronautSprite.getSubimage(
                     frameRect.x, frameRect.y, frameRect.width, frameRect.height
                 );
-                g2d.drawImage(currentSprite, player.getX(), player.getY(), 60, 60, null);
+                g2d.drawImage(currentSprite, player.getX(), player.getY(), 50, 50, null);
             } else {
                 g2d.setColor(Color.BLUE);
                 g2d.fillRect(player.getX(), player.getY(), 50, 50);
@@ -272,8 +284,8 @@ public class GamePanel extends JPanel implements ActionListener {
                 );
                 
                 g2d.drawImage(currentEffectSprite, 
-                              player.getX() + (50 - BONUS_EFFECT_DISPLAY_SIZE) / 2-20, 
-                              player.getY() + (50 - BONUS_EFFECT_DISPLAY_SIZE) / 2-25, 
+                              player.getX() + (50 - BONUS_EFFECT_DISPLAY_SIZE) / 2-30, 
+                              player.getY() + (50 - BONUS_EFFECT_DISPLAY_SIZE) / 2-20, 
                               BONUS_EFFECT_DISPLAY_SIZE, BONUS_EFFECT_DISPLAY_SIZE, null);
             } else {
                 g2d.setColor(new Color(0, 255, 0, 100));
@@ -288,7 +300,7 @@ public class GamePanel extends JPanel implements ActionListener {
             String timerText = String.format("%d s", remainingTime / 60); 
             
             int textWidth = fm.stringWidth(timerText);
-            g2d.drawString(timerText, player.getX() + (40 - textWidth) / 2, player.getY() - 10);
+            g2d.drawString(timerText, player.getX() + (50 - textWidth) / 2, player.getY() - 10);
         }
 
 
@@ -394,11 +406,15 @@ public class GamePanel extends JPanel implements ActionListener {
         }
 
         // Draw Basket/Collection point
-        g2d.setColor(new Color(139, 69, 19));
-        g2d.fillRect(getWidth() - 100, getHeight() - 100, 80, 80);
-        g2d.setColor(Color.WHITE);
-        g2d.setFont(new Font("Arial", Font.BOLD, 14));
-        g2d.drawString("Basket", getWidth() - 90, getHeight() - 110);
+        if (AssetLoader.basketImage != null) {
+            int basketX = getWidth() - BASKET_DISPLAY_WIDTH - 100; // 20px dari kanan
+            int basketY = getHeight() - BASKET_DISPLAY_HEIGHT - 100; // 20px dari bawah
+            g2d.drawImage(AssetLoader.basketImage, basketX, basketY, BASKET_DISPLAY_WIDTH+50, BASKET_DISPLAY_HEIGHT+ 50, null);
+        } else {
+            // Fallback: Kotak coklat
+            g2d.setColor(new Color(139, 69, 19)); // Brown
+            g2d.fillRect(getWidth() - BASKET_DISPLAY_WIDTH, getHeight() - BASKET_DISPLAY_HEIGHT, BASKET_DISPLAY_WIDTH, BASKET_DISPLAY_HEIGHT);
+        }
 
 
         // Draw the ball currently being pulled by the lasso
@@ -448,7 +464,7 @@ public class GamePanel extends JPanel implements ActionListener {
 
         // Draw the ball held by the player
         if (heldBall != null) {
-            int offsetDistance = 20 + heldBall.getSize() / 2;
+            int offsetDistance = 10 + heldBall.getSize() / 2;
 
             int ballX = (int) (playerCenterX + offsetDistance * Math.cos(heldBallOffsetAngle)) - heldBall.getSize() / 2;
             int ballY = (int) (playerCenterY + offsetDistance * Math.sin(heldBallOffsetAngle)) - heldBall.getSize() / 2;
@@ -624,22 +640,22 @@ public class GamePanel extends JPanel implements ActionListener {
         @Override
         public void keyPressed(KeyEvent e) {
             int key = e.getKeyCode();
-            if (key == KeyEvent.VK_LEFT) {
+            if (key == KeyEvent.VK_LEFT || key == KeyEvent.VK_A) {
                 gameViewModel.movePlayer(-5, 0);
                 isPlayerMoving = true;
                 currentPlayerAnimation = "walk_left";
                 lastPlayerDirection = "left";
-            } else if (key == KeyEvent.VK_RIGHT) {
+            } else if (key == KeyEvent.VK_RIGHT || key == KeyEvent.VK_D) {
                 gameViewModel.movePlayer(5, 0);
                 isPlayerMoving = true;
                 currentPlayerAnimation = "walk_right";
                 lastPlayerDirection = "right";
-            } else if (key == KeyEvent.VK_UP) {
+            } else if (key == KeyEvent.VK_UP || key == KeyEvent.VK_W) {
                 gameViewModel.movePlayer(0, -5);
                 isPlayerMoving = true;
                 currentPlayerAnimation = "walk_up";
                 lastPlayerDirection = "up";
-            } else if (key == KeyEvent.VK_DOWN) {
+            } else if (key == KeyEvent.VK_DOWN || key == KeyEvent.VK_S) {
                 gameViewModel.movePlayer(0, 5);
                 isPlayerMoving = true;
                 currentPlayerAnimation = "walk_down";

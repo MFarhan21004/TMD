@@ -14,8 +14,8 @@ public class Player {
     private final int BASE_SPEED = 7; // Kecepatan dasar pemain
     private final int BOOST_SPEED = 15; // Kecepatan saat bonus aktif
 
-    public static final int VISUAL_WIDTH = 50; // Ukuran lebar visual pemain
-    public static final int VISUAL_HEIGHT = 50; // Ukuran tinggi visual pemain
+    public static final int VISUAL_WIDTH = 65; // Ukuran lebar visual pemain
+    public static final int VISUAL_HEIGHT = 65; // Ukuran tinggi visual pemain
 
     // NEW: Ukuran hitbox pemain
     public static final int HITBOX_WIDTH = 25; // <<< Kurangi nilai ini untuk memperkecil lebar hitbox
