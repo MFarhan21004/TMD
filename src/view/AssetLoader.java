@@ -12,7 +12,7 @@ import javax.sound.sampled.*; // Pastikan ini diimpor
 public class AssetLoader {
     public static BufferedImage playerAstronautSprite;
     public static BufferedImage backgroundImage;
-     public static BufferedImage mainMenuBackgroundImage;
+    public static BufferedImage mainMenuBackgroundImage;
     public static BufferedImage skillBallImage;
     public static BufferedImage bombAlienImage;
     public static BufferedImage bonusStarImage;
@@ -43,7 +43,7 @@ public class AssetLoader {
 
         try {
             // Load Player Astronaut
-            URL playerAstronautUrl = AssetLoader.class.getResource("/assets/astronot.png"); // Ganti nama file ini jika di aset Anda namanya "astronot.png"
+            URL playerAstronautUrl = AssetLoader.class.getResource("/assets/images/astronot.png"); // Ganti nama file ini jika di aset Anda namanya "astronot.png"
             if (playerAstronautUrl != null) {
                 BufferedImage tempPlayer = ImageIO.read(playerAstronautUrl);
                 if (tempPlayer != null) {
@@ -55,11 +55,11 @@ public class AssetLoader {
                     System.err.println("Player astronaut sprite (tempPlayer) is null. File might be corrupted or empty.");
                 }
             } else {
-                System.err.println("Player astronaut sprite not found: /assets/astronot.png");
+                System.err.println("Player astronaut sprite not found: /assets/images/astronot.png");
             }
 
             // Load Background Image
-            URL backgroundUrl = AssetLoader.class.getResource("/assets/background.jpg");
+            URL backgroundUrl = AssetLoader.class.getResource("/assets/images/background.jpg");
             if (backgroundUrl != null) {
                 BufferedImage tempBg = ImageIO.read(backgroundUrl);
                 if (tempBg != null) {
@@ -71,10 +71,10 @@ public class AssetLoader {
                     System.err.println("Background image (tempBg) is null. File might be corrupted or empty.");
                 }
             } else {
-                System.err.println("Background image not found: /assets/background.jpg");
+                System.err.println("Background image not found: /assets/images/background.jpg");
             }
 
-            URL mainMenuBackgroundUrl = AssetLoader.class.getResource("/assets/main_background.jpg"); // Nama file baru
+            URL mainMenuBackgroundUrl = AssetLoader.class.getResource("/assets/images/main_background.jpg"); // Nama file baru
             if (mainMenuBackgroundUrl != null) {
                 BufferedImage tempMainMenuBg = ImageIO.read(mainMenuBackgroundUrl);
                 if (tempMainMenuBg != null) {
@@ -86,11 +86,11 @@ public class AssetLoader {
                     System.err.println("Main menu background image (tempMainMenuBg) is null. File might be corrupted or empty.");
                 }
             } else {
-                System.err.println("Main menu background image not found: /assets/main_background.jpg");
+                System.err.println("Main menu background image not found: /assets/images/main_background.jpg");
             }
 
             // Load Skill Ball (Star) Image (bintang1.png)
-            URL skillBallImageUrl = AssetLoader.class.getResource("/assets/bintang1.png");
+            URL skillBallImageUrl = AssetLoader.class.getResource("/assets/images/bintang_point.png");
             if (skillBallImageUrl != null) {
                 BufferedImage tempStar = ImageIO.read(skillBallImageUrl);
                 if (tempStar != null) {
@@ -102,11 +102,11 @@ public class AssetLoader {
                     System.err.println("Skill ball (star) image (tempStar) is null. File might be corrupted or empty.");
                 }
             } else {
-                System.err.println("Skill ball (star) image not found: /assets/bintang1.png");
+                System.err.println("Skill ball (star) image not found: /assets/images/bintang_point.png");
             }
 
             // Load Bomb Alien Image (bom_alien.png)
-            URL bombAlienImageUrl = AssetLoader.class.getResource("/assets/bom_alien.png");
+            URL bombAlienImageUrl = AssetLoader.class.getResource("/assets/images/bom_alien.png");
             if (bombAlienImageUrl != null) {
                 BufferedImage tempBomb = ImageIO.read(bombAlienImageUrl);
                 if (tempBomb != null) {
@@ -118,11 +118,11 @@ public class AssetLoader {
                     System.err.println("Bomb alien image (tempBomb) is null. File might be corrupted or empty.");
                 }
             } else {
-                System.err.println("Bomb alien image not found: /assets/bom_alien.png");
+                System.err.println("Bomb alien image not found: /assets/images/bom_alien.png");
             }
 
             // Load Bonus Star Image (bintangbonus.png)
-            URL bonusStarImageUrl = AssetLoader.class.getResource("/assets/bintangbonus.png");
+            URL bonusStarImageUrl = AssetLoader.class.getResource("/assets/images/bintang_bonus.png");
             if (bonusStarImageUrl != null) {
                 BufferedImage tempBonusStar = ImageIO.read(bonusStarImageUrl);
                 if (tempBonusStar != null) {
@@ -134,11 +134,11 @@ public class AssetLoader {
                     System.err.println("Bonus star image (tempBonusStar) is null. File might be corrupted or empty.");
                 }
             } else {
-                System.err.println("Bonus star image not found: /assets/bintangbonus.png");
+                System.err.println("Bonus star image not found: /assets/images/bintang_bonus.png");
             }
 
             // Load Lasso Chain Segment Image (tali.png)
-            URL lassoChainUrl = AssetLoader.class.getResource("/assets/tali.png");
+            URL lassoChainUrl = AssetLoader.class.getResource("/assets/images/tali_laso.png");
             if (lassoChainUrl != null) {
                 BufferedImage tempChain = ImageIO.read(lassoChainUrl);
                 if (tempChain != null) {
@@ -150,11 +150,11 @@ public class AssetLoader {
                     System.err.println("Lasso chain segment image (tempChain) is null. File might be corrupted or empty.");
                 }
             } else {
-                System.err.println("Lasso chain segment image not found: /assets/tali.png");
+                System.err.println("Lasso chain segment image not found: /assets/images/tali_laso.png");
             }
 
             // Load Lasso Hook Image (kail.png)
-            URL lassoHookUrl = AssetLoader.class.getResource("/assets/kail.png");
+            URL lassoHookUrl = AssetLoader.class.getResource("/assets/images/kail.png");
             if (lassoHookUrl != null) {
                 BufferedImage tempHook = ImageIO.read(lassoHookUrl);
                 if (tempHook != null) {
@@ -166,11 +166,11 @@ public class AssetLoader {
                     System.err.println("Lasso hook image (tempHook) is null. File might be corrupted or empty.");
                 }
             } else {
-                System.err.println("Lasso hook image not found: /assets/kail.png");
+                System.err.println("Lasso hook image not found: /assets/images/kail.png");
             }
 
             // Load Bonus Effect Sprite (efekbonus.png)
-            URL bonusEffectUrl = AssetLoader.class.getResource("/assets/efekbonus.png");
+            URL bonusEffectUrl = AssetLoader.class.getResource("/assets/images/efek_bonus.png");
             if (bonusEffectUrl != null) {
                 BufferedImage tempEffect = ImageIO.read(bonusEffectUrl);
                 if (tempEffect != null) {
@@ -182,11 +182,11 @@ public class AssetLoader {
                     System.err.println("Bonus effect sprite (tempEffect) is null. File might be corrupted or empty.");
                 }
             } else {
-                System.err.println("Bonus effect sprite not found: /assets/efekbonus.png");
+                System.err.println("Bonus effect sprite not found: /assets/images/efek_bonus.png");
             }
 
             // Load Basket Image (kapal.png)
-            URL basketImageUrl = AssetLoader.class.getResource("/assets/kapal.png");
+            URL basketImageUrl = AssetLoader.class.getResource("/assets/images/kapal.png");
             if (basketImageUrl != null) {
                 BufferedImage tempBasket = ImageIO.read(basketImageUrl);
                 if (tempBasket != null) {
@@ -198,13 +198,13 @@ public class AssetLoader {
                     System.err.println("Basket image (tempBasket) is null. File might be corrupted or empty.");
                 }
             } else {
-                System.err.println("Basket image not found: /assets/kapal.png");
+                System.err.println("Basket image not found: /assets/images/kapal.png");
             }
 
 
             // Load Sound Assets dan mendapatkan FloatControl
             // Background Music (background_music.wav)
-            URL bgMusicUrl = AssetLoader.class.getResource("/assets/background_music.wav");
+            URL bgMusicUrl = AssetLoader.class.getResource("/assets/sounds/background_music.wav");
             if (bgMusicUrl != null) {
                 try (AudioInputStream audioStream = AudioSystem.getAudioInputStream(bgMusicUrl)) {
                     backgroundMusicClip = AudioSystem.getClip();
@@ -219,11 +219,11 @@ public class AssetLoader {
                     System.err.println("Error loading background music: " + e.getMessage());
                 }
             } else {
-                System.err.println("Background music not found: /assets/background_music.wav");
+                System.err.println("Background music not found: /assets/sounds/background_music.wav");
             }
 
             // Bonus Music (musicbonus.wav)
-            URL bonusMusicUrl = AssetLoader.class.getResource("/assets/musicbonus.wav");
+            URL bonusMusicUrl = AssetLoader.class.getResource("/assets/sounds/music_bonus.wav");
             if (bonusMusicUrl != null) {
                 try (AudioInputStream audioStream = AudioSystem.getAudioInputStream(bonusMusicUrl)) {
                     bonusMusicClip = AudioSystem.getClip();
@@ -238,11 +238,11 @@ public class AssetLoader {
                     System.err.println("Error loading bonus music: " + e.getMessage());
                 }
             } else {
-                System.err.println("Bonus music not found: /assets/musicbonus.wav");
+                System.err.println("Bonus music not found: /assets/sounds/music_bonus.wav");
             }
 
             // Bomb Effect Sound (musicefekbom.wav)
-            URL bombEffectUrl = AssetLoader.class.getResource("/assets/musicefekbom.wav");
+            URL bombEffectUrl = AssetLoader.class.getResource("/assets/sounds/music_efek_bom.wav");
             if (bombEffectUrl != null) {
                 try (AudioInputStream audioStream = AudioSystem.getAudioInputStream(bombEffectUrl)) {
                     bombEffectClip = AudioSystem.getClip();
@@ -257,11 +257,11 @@ public class AssetLoader {
                     System.err.println("Error loading bomb effect sound: " + e.getMessage());
                 }
             } else {
-                System.err.println("Bomb effect sound not found: /assets/musicefekbom.wav");
+                System.err.println("Bomb effect sound not found: /assets/sounds/music_efek_bom.wav");
             }
 
             // Main Menu Music (main_music.wav)
-            URL mainMenuMusicUrl = AssetLoader.class.getResource("/assets/main_music.wav");
+            URL mainMenuMusicUrl = AssetLoader.class.getResource("/assets/sounds/main_music.wav");
             if (mainMenuMusicUrl != null) {
                 try (AudioInputStream audioStream = AudioSystem.getAudioInputStream(mainMenuMusicUrl)) {
                     mainMenuMusicClip = AudioSystem.getClip();
@@ -276,7 +276,7 @@ public class AssetLoader {
                     System.err.println("Error loading main menu music: " + e.getMessage());
                 }
             } else {
-                System.err.println("Main menu music not found: /assets/main_music.wav");
+                System.err.println("Main menu music not found: /assets/sounds/main_music.wav");
             }
 
 

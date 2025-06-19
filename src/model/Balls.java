@@ -2,49 +2,83 @@ import java.awt.Color;
 import java.util.Random;
 
 public class Balls {
+    // Posisi koordinat saat ini
     private int x;
     private int y;
-    private int originalX; // Store original position for animation start
-    private int originalY; // Store original position for animation start
-    private int value;
-    private int size;
-    private Color color;
-    private boolean active;
-    private boolean isBeingPulled; // True if the ball is currently being pulled by lasso (animating to player)
-    private boolean isHeldByPlayer; // True if the ball has reached the player and is being carried
-    private boolean isBomb;       // True if this ball is a bomb
-    private boolean isBonusStar;  // NEW: True if this ball is a bonus star
-    private int speed;
-    private boolean movingRight; // Direction of movement
+    
+    // Posisi awal (digunakan untuk animasi menarik bola ke pemain)
+    private int originalX;
+    private int originalY;
 
-    // Modified constructor to accept isBomb and isBonusStar parameters
+    // Nilai angka pada bola (1–10)
+    private int value;
+
+    // Ukuran diameter bola
+    private int size;
+
+    // Warna bola (digunakan jika asset gambar gagal dimuat)
+    private Color color;
+
+    // Status apakah bola masih aktif (belum ditangkap/dihilangkan)
+    private boolean active;
+
+    // True jika bola sedang dalam proses ditarik oleh lasso (bergerak ke pemain)
+    private boolean isBeingPulled;
+
+    // True jika bola sudah sampai ke pemain dan sedang dibawa
+    private boolean isHeldByPlayer;
+
+    // True jika bola ini adalah bom
+    private boolean isBomb;
+
+    // True jika bola ini adalah bintang bonus
+    private boolean isBonusStar;
+
+    // Kecepatan gerak bola
+    private int speed;
+
+    // Arah gerakan bola (true: ke kanan, false: ke kiri)
+    private boolean movingRight;
+
+    // Konstruktor dengan parameter lengkap termasuk jenis bom dan bonus
     public Balls(int startX, int startY, int minSpeed, int maxSpeed, int minSize, int maxSize, boolean isBomb, boolean isBonusStar) {
         this.x = startX;
         this.y = startY;
         this.originalX = startX;
         this.originalY = startY;
-        Random rand = new Random();
-        this.value = rand.nextInt(10) + 1;
-        this.size = rand.nextInt(maxSize - minSize + 1) + minSize;
-        this.isBomb = isBomb;
-        this.isBonusStar = isBonusStar; // Set bonus star status
 
-        // Set color based on type (for fallback drawing if image assets fail)
+        Random rand = new Random();
+
+        // Nilai acak antara 1 hingga 10
+        this.value = rand.nextInt(10) + 1;
+
+        // Ukuran acak antara minSize dan maxSize
+        this.size = rand.nextInt(maxSize - minSize + 1) + minSize;
+
+        this.isBomb = isBomb;
+        this.isBonusStar = isBonusStar;
+
+        // Tentukan warna berdasarkan tipe bola
         if (this.isBomb) {
-            this.color = Color.RED;
+            this.color = Color.RED; // Warna untuk bom
         } else if (this.isBonusStar) {
-            this.color = Color.MAGENTA; // Or any distinct color for bonus star fallback
+            this.color = Color.MAGENTA; // Warna untuk bintang bonus
         } else {
-            this.color = generateRandomColor();
+            this.color = generateRandomColor(); // Warna acak untuk bola biasa
         }
 
         this.active = true;
         this.isBeingPulled = false;
         this.isHeldByPlayer = false;
+
+        // Kecepatan acak dalam rentang tertentu
         this.speed = rand.nextInt(maxSpeed - minSpeed + 1) + minSpeed;
+
+        // Atur arah gerak awal berdasarkan posisi Y
         this.movingRight = (startY < 300);
     }
 
+    // Fungsi untuk menghasilkan warna acak RGB
     private Color generateRandomColor() {
         Random rand = new Random();
         float r = rand.nextFloat();
@@ -53,6 +87,7 @@ public class Balls {
         return new Color(r, g, b);
     }
 
+    // Getter dan Setter untuk atribut-atribut bola
     public int getX() { return x; }
     public void setX(int x) { this.x = x; }
     public int getY() { return y; }
@@ -62,7 +97,7 @@ public class Balls {
     public void setOriginalPosition(int x, int y) { this.originalX = x; this.originalY = y; }
     public int getValue() { return value; }
     public int getSize() { return size; }
-    public Color getColor() { return color; } // This will return RED for bombs, MAGENTA for bonus, etc.
+    public Color getColor() { return color; } // Warna fallback untuk rendering
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
     public boolean isBeingPulled() { return isBeingPulled; }
@@ -70,10 +105,13 @@ public class Balls {
     public boolean isHeldByPlayer() { return isHeldByPlayer; }
     public void setHeldByPlayer(boolean isHeldByPlayer) { this.isHeldByPlayer = isHeldByPlayer; }
     public boolean isBomb() { return isBomb; }
-    public boolean isBonusStar() { return isBonusStar; } // NEW: Getter for isBonusStar
+    public boolean isBonusStar() { return isBonusStar; } // Getter untuk status bonus star
+
+    // Fungsi untuk menggerakkan bola ke kanan atau kiri tergantung arah
     public void move() {
         if (movingRight) { x += speed; } else { x -= speed; }
     }
+
     public boolean isMovingRight() { return movingRight; }
     public int getSpeed() { return speed; }
 }
