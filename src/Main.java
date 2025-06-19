@@ -1,3 +1,9 @@
+/** 
+Saya Muhammad Farhan dengan NIM 2309323 mengerjakan evaluasi Tugas Masa Depan dalam mata kuliah
+Desain dan Pemrograman Berorientasi Objek untuk keberkahanNya maka saya
+tidak melakukan kecurangan seperti yang telah dispesifikasikan. Aamiin
+*/
+
 import javax.swing.SwingUtilities; // Import kelas SwingUtilities untuk manajemen Event Dispatch Thread (EDT).
 
 /**

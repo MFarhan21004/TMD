@@ -104,7 +104,7 @@ public class GameViewModel {
      * dan memicu spawn bola baru.
      */
     public void updateGame() {
-        // NEW: Perhitungan posisi hitbox pemain.
+    
         // Hitbox pemain diletakkan di tengah visual pemain.
         int hitboxX = player.getX() + (Player.VISUAL_WIDTH - Player.HITBOX_WIDTH) / 2;
         int hitboxY = player.getY() + (Player.VISUAL_HEIGHT - Player.HITBOX_HEIGHT) / 2;
